@@ -18,7 +18,7 @@ permissions:
   contents: read
   
 env:  
-    image_name: mcr.microsoft.com/dotnet/sdk:6.0
+    IMAGE_NAME: mcr.microsoft.com/dotnet/sdk:6.0
     my_image_name: mohcontreg.azurecr.io/dotnet/sdk:6.0
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
      
       - name: Pull an Image from Dockerhub
         run: |
-           docker pull $image_name 
+           docker pull $IMAGE_NAME
            
            
      
@@ -52,7 +52,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
         with:
-          image-ref: $image_name
+          image-ref: '$IMAGE_NAME'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
