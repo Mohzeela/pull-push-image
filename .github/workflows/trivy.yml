@@ -37,6 +37,9 @@ jobs:
            docker pull $image_name 
            docker tag $image_name $my_image_name
   scan_image:
+      name: Build
+      runs-on: "ubuntu-18.04"
+      steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
         with:
