@@ -31,9 +31,9 @@ jobs:
         env:  
           image_name: mcr.microsoft.com/dotnet/sdk:6.0
 
-      - name: Pull an Image from Dockerhub
-        run: |
-          docker pull ${{ image_name }} .
+     # - name: Pull an Image from Dockerhub
+      #  run: |
+       #   docker pull ${{ image_name }} .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
