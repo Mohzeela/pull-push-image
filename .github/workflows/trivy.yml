@@ -19,7 +19,7 @@ permissions:
   
 env:  
     image_name: mcr.microsoft.com/dotnet/sdk:6.0
-    my_image_name: dotnet/sdk:6.0
+    my_image_name: mohcontreg.azurecr.io/dotnet/sdk:6.0
 jobs:
   build:
     permissions:
@@ -36,10 +36,10 @@ jobs:
         run: |
            docker pull $image_name 
            docker tag $image_name $my_image_name
-  scan_image:
-      name: scan_image
-      runs-on: "ubuntu-18.04"
-      steps:
+#   scan_image:
+#       name: scan_image
+#       runs-on: "ubuntu-18.04"
+#       steps:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
         with:
@@ -54,12 +54,17 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
           
-          
-    #  - name: push scanned image to ECR
-      #  if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-      #  needs: [scan_image]
-      #  run: |
-       #   aws ecr get-login-password --region $HC_GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $HC_GLOBAL_ECR_URL
+  push_repo:
+      name: push_repo
+      runs-on: "ubuntu-18.04"  
+      if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+      needs: [scan_image]
+      steps:
+      - name: push scanned image to ECR
+        
+        run: |
+           echo "it's working"
+#   aws ecr get-login-password --region $HC_GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $HC_GLOBAL_ECR_URL
         #  sudo docker push $HC_GLOBAL_ECR_URL/$IMAGE_NAME:$GITHUB_RUN_ID
        #   sudo docker logout $HC_GLOBAL_ECR_URL
         #  sudo docker rmi $(sudo docker images -q ${HC_GLOBAL_ECR_URL}/${IMAGE_NAME})
