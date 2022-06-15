@@ -24,12 +24,12 @@ env:
   AWS_CREDS_DIRECTORY: ~/.aws
   HC_FROM_IMAGE: ${{ secrets.GLOBAL_CORE_3_IMAGE }}     
 jobs:
-  clean-workspace-before:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Cleanup Workspace
-      run: |
-          rm -rf "${{ github.workspace }}" 
+#   clean-workspace-before:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Cleanup Workspace
+#       run: |
+#           rm -rf "${{ github.workspace }}" 
   pull-scan-image:
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -61,24 +61,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
-
-#   log-into-aws:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Log Into AWS
-#         run: | 
-#           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
-#           aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
-#           aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
-#           aws configure set default.region $GLOBAL_AWS_REGION
-#           aws ecr get-login-password --region $GLOBAL_AWS_REGION 
           
-  push-image:
-      name: push image to ECR
-      runs-on: ubuntu-latest 
-      if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-      needs: [pull-scan-image]
-      steps:
       - name: Log Into AWS
         run: | 
           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
@@ -95,6 +78,40 @@ jobs:
            sudo docker push $GLOBAL_ECR_URL/$IMAGE_NAME:latest
            sudo docker logout $GLOBAL_ECR_URL
            sudo docker rmi $(sudo docker images -q $GLOBAL_ECR_URL/IMAGE_NAME:latest)
+
+#   log-into-aws:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Log Into AWS
+#         run: | 
+#           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
+#           aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
+#           aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
+#           aws configure set default.region $GLOBAL_AWS_REGION
+#           aws ecr get-login-password --region $GLOBAL_AWS_REGION 
+          
+#   push-image:
+#       name: push image to ECR
+#       runs-on: ubuntu-latest 
+#       if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+#       needs: [pull-scan-image]
+#       steps:
+#       - name: Log Into AWS
+#         run: | 
+#           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
+#           aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
+#           aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
+#           aws configure set default.region $GLOBAL_AWS_REGION
+#           aws ecr get-login-password --region $GLOBAL_AWS_REGION 
+          
+#       - name: push scanned image to ECR
+#         run: |
+#            echo "it's working"
+#            aws ecr get-login-password --region $GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $GLOBAL_ECR_URL
+#            sudo docker tag $EXTERNAL_IMAGE_NAME  $IMAGE_NAME:latest
+#            sudo docker push $GLOBAL_ECR_URL/$IMAGE_NAME:latest
+#            sudo docker logout $GLOBAL_ECR_URL
+#            sudo docker rmi $(sudo docker images -q $GLOBAL_ECR_URL/IMAGE_NAME:latest)
 #   clean-workspace-after:
 #       if: always()
 #       needs: [pull-scan-image, push-image]
