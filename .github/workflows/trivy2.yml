@@ -16,13 +16,13 @@ env:
   IMAGE_NAME: hc-dotnet6-base
 #   HC_DEPLOY_FOLDER: k8s/dev-adp
 #   HC_DEPLOY_NAMESPACE: dev-adp
-  GLOBAL_ECR_URL: ${{ secrets.HC_GLOBAL_ECR_URL }}               
-  GLOBAL_EKS_DEVSTAGE: ${{ secrets.HC_GLOBAL_EKS_DEVSTAGE }}            
-  GLOBAL_AWS_REGION: ${{ secrets.HC_GLOBAL_AWS_REGION }}       
-  GLOBAL_DEVSTAGE_IAM_ACCESSKEY: ${{ secrets.HC_GLOBAL_DEVSTAGE_IAM_ACCESSKEY }}
-  GLOBAL_DEVSTAGE_IAM_SECRET: ${{ secrets.HC_GLOBAL_DEVSTAGE_IAM_SECRET}}
+  GLOBAL_ECR_URL: ${{ secrets.GLOBAL_ECR_URL }}               
+  GLOBAL_EKS_DEVSTAGE: ${{ secrets.GLOBAL_EKS_DEVSTAGE }}            
+  GLOBAL_AWS_REGION: ${{ secrets.GLOBAL_AWS_REGION }}       
+  GLOBAL_DEVSTAGE_IAM_ACCESSKEY: ${{ secrets.GLOBAL_DEVSTAGE_IAM_ACCESSKEY }}
+  GLOBAL_DEVSTAGE_IAM_SECRET: ${{ secrets.GLOBAL_DEVSTAGE_IAM_SECRET}}
   AWS_CREDS_DIRECTORY: ~/.aws
-  HC_FROM_IMAGE: ${{ secrets.HC_GLOBAL_CORE_3_IMAGE }}     
+  HC_FROM_IMAGE: ${{ secrets.GLOBAL_CORE_3_IMAGE }}     
 jobs:
   clean-workspace-before:
     runs-on: ubuntu-latest
