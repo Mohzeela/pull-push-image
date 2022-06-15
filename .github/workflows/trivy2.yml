@@ -13,7 +13,7 @@ permissions:
   
 env:  
   EXTERNAL_IMAGE_NAME: mcr.microsoft.com/dotnet/sdk:6.0
-  IMAGE_NAME: hc-dotnet6-base
+  IMAGE_NAME: hc-dotnet6-base:latest
 #   HC_DEPLOY_FOLDER: k8s/dev-adp
 #   HC_DEPLOY_NAMESPACE: dev-adp
   GLOBAL_ECR_URL: ${{ secrets.GLOBAL_ECR_URL }}               
@@ -74,10 +74,10 @@ jobs:
         run: |
            echo "it's working"
            aws ecr get-login-password --region $GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $GLOBAL_ECR_URL
-           sudo docker tag $EXTERNAL_IMAGE_NAME  $IMAGE_NAME:latest
+           sudo docker tag $EXTERNAL_IMAGE_NAME  $IMAGE_NAME
            sudo docker push $GLOBAL_ECR_URL/$IMAGE_NAME:latest
            sudo docker logout $GLOBAL_ECR_URL
-           sudo docker rmi $(sudo docker images -q $GLOBAL_ECR_URL/IMAGE_NAME:latest)
+           sudo docker rmi $(sudo docker images -q $GLOBAL_ECR_URL/IMAGE_NAME)
 
 #   log-into-aws:
 #     runs-on: ubuntu-latest
