@@ -1,0 +1,98 @@
+
+name: Homechoice Pull and scan external images pipeline
+
+on: 
+#   push:
+#     branches:
+#       - main
+# actions/**'
+   workflow_dispatch:
+
+permissions:
+  contents: read
+  
+env:  
+  EXTERNAL_IMAGE_NAME: mcr.microsoft.com/dotnet/sdk:6.0
+  IMAGE_NAME: hc-dotnet6-base
+#   HC_DEPLOY_FOLDER: k8s/dev-adp
+#   HC_DEPLOY_NAMESPACE: dev-adp
+  GLOBAL_ECR_URL: ${{ secrets.HC_GLOBAL_ECR_URL }}               
+  GLOBAL_EKS_DEVSTAGE: ${{ secrets.HC_GLOBAL_EKS_DEVSTAGE }}            
+  GLOBAL_AWS_REGION: ${{ secrets.HC_GLOBAL_AWS_REGION }}       
+  GLOBAL_DEVSTAGE_IAM_ACCESSKEY: ${{ secrets.HC_GLOBAL_DEVSTAGE_IAM_ACCESSKEY }}
+  GLOBAL_DEVSTAGE_IAM_SECRET: ${{ secrets.HC_GLOBAL_DEVSTAGE_IAM_SECRET}}
+  AWS_CREDS_DIRECTORY: ~/.aws
+  HC_FROM_IMAGE: ${{ secrets.HC_GLOBAL_CORE_3_IMAGE }}     
+jobs:
+  clean-workspace-before:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cleanup Workspace
+      run: |
+          rm -rf "${{ github.workspace }}" 
+  pull-scan-image:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    name: pull-scan-image
+    runs-on: eks-devstage-vm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Pull Image from Public Repo
+        run: |
+           docker pull $EXTERNAL_IMAGE_NAME
+
+#       - name: install Trivy
+#         run: |
+#             wget -qO- https://github.com/aquasecurity/trivy/releases/download/v0.13.0/trivy_0.13.0_Linux-64bit.tar.gz| tar -xvzf - -C .
+  
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.EXTERNAL_IMAGE_NAME }}'
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  log-into-aws:
+    runs-on: eks-devstage-vm
+    steps:
+      - name: Log Into AWS
+        run: | 
+          if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
+          aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
+          aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
+          aws configure set default.region $GLOBAL_AWS_REGION
+          aws ecr get-login-password --region $GLOBAL_AWS_REGION 
+          
+  push-image:
+      name: push image to ECR
+      runs-on: ubuntu-latest 
+      if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+      needs: [pull-scan-image]
+      steps:
+      - name: push scanned image to ECR
+        run: |
+           echo "it's working"
+           aws ecr get-login-password --region $GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $GLOBAL_ECR_URL
+           sudo docker tag $(env.EXTERNAL_IMAGE_NAME) ${{env.IMAGE_NAME}}:latest
+           sudo docker push $GLOBAL_ECR_URL/${{env.IMAGE_NAME}}:latest
+           sudo docker logout $GLOBAL_ECR_URL
+           sudo docker rmi $(sudo docker images -q ${{GLOBAL_ECR_URL}/${{env.IMAGE_NAME}}:latest)
+#   clean-workspace-after:
+#       if: always()
+#       needs: [pull-scan-image, push-image]
+#       runs-on: eks-devstage-vm
+#       steps:
+#       - name: Cleanup Workspace
+#         run: |
+#           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -rf $HC_AWS_CREDS_DIRECTORY; fi 
+#           rm -rf "${{ github.workspace }}"
