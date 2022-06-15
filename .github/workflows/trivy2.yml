@@ -83,10 +83,10 @@ jobs:
         run: |
            echo "it's working"
            aws ecr get-login-password --region $GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $GLOBAL_ECR_URL
-           sudo docker tag $(env.EXTERNAL_IMAGE_NAME) ${{env.IMAGE_NAME}}:latest
+           sudo docker tag ${{ env.EXTERNAL_IMAGE_NAME }} ${{env.IMAGE_NAME}}:latest
            sudo docker push $GLOBAL_ECR_URL/${{env.IMAGE_NAME}}:latest
            sudo docker logout $GLOBAL_ECR_URL
-           sudo docker rmi $(sudo docker images -q ${{GLOBAL_ECR_URL}/${{env.IMAGE_NAME}}:latest)
+           sudo docker rmi $(sudo docker images -q ${{GLOBAL_ECR_URL}/${{ env.IMAGE_NAME }}:latest)
 #   clean-workspace-after:
 #       if: always()
 #       needs: [pull-scan-image, push-image]
