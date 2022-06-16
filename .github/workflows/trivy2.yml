@@ -1,5 +1,5 @@
 
-name: Homechoice Pull and scan external images pipeline
+name: Pull and scan external images pipeline
 
 on: 
 #   push:
@@ -73,7 +73,7 @@ jobs:
       - name: push scanned image to ECR
         run: |
            echo "it's working"
-           aws ecr get-login-password --region $GLOBAL_AWS_REGION | sudo docker login --username AWS --password-stdin $GLOBAL_ECR_URL
+           sudo docker -u AWS -p $(aws ecr get-login-password --region $GLOBAL_AWS_REGION) $GLOBAL_ECR_URL
            sudo docker tag $EXTERNAL_IMAGE_NAME  $GLOBAL_ECR_URL/$IMAGE_NAME
            sudo docker push $GLOBAL_ECR_URL/$IMAGE_NAME
            sudo docker logout $GLOBAL_ECR_URL
