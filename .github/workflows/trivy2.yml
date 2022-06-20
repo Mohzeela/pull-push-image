@@ -77,7 +77,8 @@ jobs:
            sudo docker login -u AWS -p $(aws ecr get-login-password --region $GLOBAL_AWS_REGION) $GLOBAL_ECR_URL
            sudo docker push $GLOBAL_ECR_URL:$IMAGE_TAG
            sudo docker logout $GLOBAL_ECR_URL
-           sudo docker rmi $(sudo docker images -q $GLOBAL_ECR_URL)
+           sudo docker rmi $GLOBAL_ECR_URL
+       #    sudo docker rmi $(sudo docker images -q $GLOBAL_ECR_URL)
 
 #   log-into-aws:
 #     runs-on: ubuntu-latest
