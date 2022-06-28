@@ -28,6 +28,7 @@ jobs:
     - name: Cleanup Workspace
       run: |
           rm -rf "${{ github.workspace }}" 
+  
   pull-scan-image:
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -63,6 +64,7 @@ jobs:
 
   log-into-aws:
        runs-on: self-hosted
+       needs: [clean-workspace-before, pull-scan-image]
        steps:
        - name: Log Into AWS
          run: | 
