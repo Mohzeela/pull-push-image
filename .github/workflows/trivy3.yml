@@ -11,6 +11,9 @@ permissions:
   contents: read
   
 env:  
+  EXTERNAL_IMAGE_NAME: mcr.microsoft.com/dotnet/sdk:6.0
+  GLOBAL_REPO_NAME: ${{ secrets.GLOBAL_REPO_NAME }}    
+  IMAGE_TAG: latest
   GLOBAL_ECR_URL: ${{ secrets.GLOBAL_ECR_URL }}               
   GLOBAL_EKS_DEVSTAGE: ${{ secrets.GLOBAL_EKS_DEVSTAGE }}            
   GLOBAL_AWS_REGION: ${{ secrets.GLOBAL_AWS_REGION }}       
@@ -69,11 +72,11 @@ jobs:
       - name: push scanned image to ECR
         run: |
            echo "it's working"
-           sudo docker tag $EXTERNAL_IMAGE_NAME  $GLOBAL_ECR_URL:$IMAGE_TAG
-           sudo docker login -u AWS -p $(aws ecr get-login-password --region $GLOBAL_AWS_REGION) $GLOBAL_ECR_URL
+           sudo docker tag $EXTERNAL_IMAGE_NAME  $GLOBAL_ECR_URL/$GLOBAL_REPO_NAME:$IMAGE_TAG
+           sudo docker login -u AWS -p $(aws ecr get-login-password --region $GLOBAL_AWS_REGION) $GLOBAL_ECR_URL/$GLOBAL_REPO_NAME
            sudo docker push $GLOBAL_ECR_URL:$IMAGE_TAG
-           sudo docker logout $GLOBAL_ECR_URL
-           sudo docker rmi $GLOBAL_ECR_URL
+           sudo docker logout $GLOBAL_ECR_URL/$GLOBAL_REPO_NAME
+           sudo docker rmi $GLOBAL_ECR_URL/$GLOBAL_REPO_NAME
   clean-workspace-after:
       if: always()
       needs: [pull-scan-image]
