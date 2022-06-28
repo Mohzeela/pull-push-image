@@ -90,7 +90,7 @@ jobs:
            sudo docker rmi $GLOBAL_ECR_URL/$GLOBAL_REPO_NAME
   clean-workspace-after:
       if: always()
-      needs: [pull-scan-image]
+      needs: [pull-scan-image, push-image]
       runs-on: self-hosted
       steps:
       - name: Cleanup Workspace
