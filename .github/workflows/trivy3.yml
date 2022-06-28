@@ -61,14 +61,23 @@ jobs:
 #         with:
 #           sarif_file: 'trivy-results.sarif'
 
-      - name: Log Into AWS
-        run: | 
+  log-into-aws:
+       runs-on: self-hosted
+       steps:
+       - name: Log Into AWS
+         run: | 
           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
           aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
           aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
           aws configure set default.region $GLOBAL_AWS_REGION
           aws ecr get-login-password --region $GLOBAL_AWS_REGION 
           
+  push-image:
+      name: push image to ECR
+      runs-on: self-hosted 
+      if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+      needs: [clean-workspace-before, pull-scan-image, log-into-aws]
+      steps:
       - name: push scanned image to ECR
         run: |
            echo "it's working"
