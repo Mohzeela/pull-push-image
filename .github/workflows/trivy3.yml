@@ -74,7 +74,7 @@ jobs:
            echo "it's working"
            sudo docker tag $EXTERNAL_IMAGE_NAME  $GLOBAL_ECR_URL$GLOBAL_REPO_NAME
            sudo docker login -u AWS -p $(aws ecr get-login-password --region $GLOBAL_AWS_REGION) $GLOBAL_ECR_URL$GLOBAL_REPO_NAME
-           sudo docker push $GLOBAL_ECR_URL:$IMAGE_TAG
+           sudo docker push $GLOBAL_ECR_URL$GLOBAL_REPO_NAME
            sudo docker logout $GLOBAL_ECR_URL$GLOBAL_REPO_NAME
            sudo docker rmi $GLOBAL_ECR_URL$GLOBAL_REPO_NAME
   clean-workspace-after:
