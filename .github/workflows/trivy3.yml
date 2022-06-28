@@ -1,4 +1,4 @@
-name: Homechoice Pull and scan external images pipeline
+name: Moh Pull and scan external images pipeline
 
 on: 
 #   push:
