@@ -23,7 +23,7 @@ env:
   HC_FROM_IMAGE: ${{ secrets.GLOBAL_CORE_3_IMAGE }}    
 jobs:
   clean-workspace-before:
-    runs-on: moh-runner
+    runs-on: self-hosted
     steps:
     - name: Cleanup Workspace
       run: |
