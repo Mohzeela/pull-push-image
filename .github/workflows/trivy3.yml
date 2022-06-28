@@ -11,20 +11,16 @@ permissions:
   contents: read
   
 env:  
-  EXTERNAL_IMAGE_NAME: mcr.microsoft.com/dotnet/sdk:6.0
-  IMAGE_TAG: latest
-  HC_DEPLOY_FOLDER: k8s/dev-adp
-  HC_DEPLOY_NAMESPACE: dev-adp
-  HC_GLOBAL_ECR_URL: ${{ secrets.HC_GLOBAL_ECR_URL }}               
-  HC_GLOBAL_EKS_DEVSTAGE: ${{ secrets.HC_GLOBAL_EKS_DEVSTAGE }}            
-  HC_GLOBAL_AWS_REGION: ${{ secrets.HC_GLOBAL_AWS_REGION }}       
-  HC_GLOBAL_DEVSTAGE_IAM_ACCESSKEY: ${{ secrets.HC_GLOBAL_DEVSTAGE_IAM_ACCESSKEY }}
-  HC_GLOBAL_DEVSTAGE_IAM_SECRET: ${{ secrets.HC_GLOBAL_DEVSTAGE_IAM_SECRET}}
-  HC_AWS_CREDS_DIRECTORY: ~/.aws
-  HC_FROM_IMAGE: ${{ secrets.HC_GLOBAL_CORE_3_IMAGE }}     
+  GLOBAL_ECR_URL: ${{ secrets.GLOBAL_ECR_URL }}               
+  GLOBAL_EKS_DEVSTAGE: ${{ secrets.GLOBAL_EKS_DEVSTAGE }}            
+  GLOBAL_AWS_REGION: ${{ secrets.GLOBAL_AWS_REGION }}       
+  GLOBAL_DEVSTAGE_IAM_ACCESSKEY: ${{ secrets.GLOBAL_DEVSTAGE_IAM_ACCESSKEY }}
+  GLOBAL_DEVSTAGE_IAM_SECRET: ${{ secrets.GLOBAL_DEVSTAGE_IAM_SECRET}}
+  AWS_CREDS_DIRECTORY: ~/.aws
+  HC_FROM_IMAGE: ${{ secrets.GLOBAL_CORE_3_IMAGE }}    
 jobs:
   clean-workspace-before:
-    runs-on: eks-devstage-vm
+    runs-on: moh-runner
     steps:
     - name: Cleanup Workspace
       run: |
@@ -62,34 +58,25 @@ jobs:
 #         with:
 #           sarif_file: 'trivy-results.sarif'
 
-  log-into-aws:
-    runs-on: eks-devstage-vm
-    steps:
       - name: Log Into AWS
         run: | 
           if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
-          aws configure set aws_access_key_id $HC_GLOBAL_DEVSTAGE_IAM_ACCESSKEY
-          aws configure set aws_secret_access_key $HC_GLOBAL_DEVSTAGE_IAM_SECRET
-          aws configure set default.region $HC_GLOBAL_AWS_REGION
-          aws ecr get-login-password --region $HC_GLOBAL_AWS_REGION 
+          aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
+          aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
+          aws configure set default.region $GLOBAL_AWS_REGION
+          aws ecr get-login-password --region $GLOBAL_AWS_REGION 
           
-  push-image:
-      name: push image to ECR
-      runs-on: eks-devstage-vm  
-      if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-      needs: [clean-workspace-before, pull-scan-image, log-into-aws]
-      steps:
       - name: push scanned image to ECR
         run: |
            echo "it's working"
-           sudo docker login -u AWS -p $(aws ecr get-login-password --region $HC_GLOBAL_AWS_REGION) $HC_GLOBAL_ECR_URL
-           sudo docker tag $EXTERNAL_IMAGE_NAME $HC_GLOBAL_ECR_URL:$IMAGE_TAG
-           sudo docker push $HC_GLOBAL_ECR_URL:$IMAGE_TAG
-           sudo docker logout $HC_GLOBAL_ECR_URL
-           sudo docker rmi $(sudo docker images -q ${HC_GLOBAL_ECR_URL}:$IMAGE_TAG
+           sudo docker tag $EXTERNAL_IMAGE_NAME  $GLOBAL_ECR_URL:$IMAGE_TAG
+           sudo docker login -u AWS -p $(aws ecr get-login-password --region $GLOBAL_AWS_REGION) $GLOBAL_ECR_URL
+           sudo docker push $GLOBAL_ECR_URL:$IMAGE_TAG
+           sudo docker logout $GLOBAL_ECR_URL
+           sudo docker rmi $GLOBAL_ECR_URL
   clean-workspace-after:
       if: always()
-      needs: [pull-scan-image, push-image]
+      needs: [pull-scan-image]
       runs-on: eks-devstage-vm
       steps:
       - name: Cleanup Workspace
