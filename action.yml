@@ -3,14 +3,10 @@ name: 'TRIVY SCAN'
 description: 'SCAN CONTAINER IMAGES WITH TRIVY'
 inputs:
     image-name:
-         dexcription: name of image to be scanned
-#   who-to-greet:  # id of input
-#     description: 'Who to greet'
-#     required: true
-#     default: 'World'
+         description: name of image to be scanned
 outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+#   time: # id of output
+#     description: 'The time we greeted you'
 runs:
   using: 'docker'
   image: aquasec/trivy
