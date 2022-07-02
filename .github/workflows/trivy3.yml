@@ -43,9 +43,16 @@ jobs:
         run: |
            docker pull $EXTERNAL_IMAGE_NAME
            
-      - name: Run Trivy vulnerability scanner
-        run: |
-           trivy image --exit-code 1 --severity HIGH,CRITICAL $EXTERNAL_IMAGE_NAME
+      - name: Get Pokemon name
+        uses: ./ # Uses an action in the root directory
+#         run: docker run aquasec/trivy image python:3.4-alpine
+           
+      - name: scan with trivy image
+        run: docker run aquasec/trivy image $EXTERNAL_IMAGE_NAME
+        
+#       - name: Run Trivy vulnerability scanner
+#         run: |
+#            trivy image --exit-code 1 --severity HIGH,CRITICAL $EXTERNAL_IMAGE_NAME
        
 
 #       - name: Run Trivy vulnerability scanner
