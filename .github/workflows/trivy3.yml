@@ -42,6 +42,7 @@ jobs:
       - name: Pull Image from Public Repo
         run: |
            docker pull $EXTERNAL_IMAGE_NAME
+           echo $USER
            
       - name: scan with trivy image
         uses: ./ # Uses an action in the root directory
