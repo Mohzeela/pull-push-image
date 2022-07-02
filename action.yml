@@ -5,6 +5,8 @@ inputs:
     image-name:
          description: name of image to be scanned
 outputs:
+    scan-result:
+        description: result of the trivy scan
 #   time: # id of output
 #     description: 'The time we greeted you'
 runs:
