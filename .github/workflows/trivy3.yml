@@ -43,7 +43,7 @@ jobs:
         run: |
            docker pull $EXTERNAL_IMAGE_NAME
            
-      - name: Get Pokemon name
+      - name: scan with trivy image
         uses: ./ # Uses an action in the root directory
 #         run: docker run aquasec/trivy image python:3.4-alpine
            
