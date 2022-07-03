@@ -76,7 +76,7 @@ jobs:
        steps:
        - name: Log Into AWS
          run: | 
-          if [ -d "$HC_AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $HC_AWS_CREDS_DIRECTORY; fi
+          if [ -d "$AWS_CREDS_DIRECTORY" ]; then sudo rm -Rf $AWS_CREDS_DIRECTORY; fi
           aws configure set aws_access_key_id $GLOBAL_DEVSTAGE_IAM_ACCESSKEY
           aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
           aws configure set default.region $GLOBAL_AWS_REGION
