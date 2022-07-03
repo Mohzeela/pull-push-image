@@ -11,7 +11,7 @@ permissions:
   contents: read
   
 env:  
-  EXTERNAL_IMAGE_NAME:  mcr.microsoft.com/dotnet/sdk:6.0
+  EXTERNAL_IMAGE_NAME:  nginx:alpine
   GLOBAL_REPO_NAME: ${{ secrets.GLOBAL_REPO_NAME }}    
   IMAGE_TAG: latest
   GLOBAL_ECR_URL: ${{ secrets.GLOBAL_ECR_URL }}               
