@@ -81,6 +81,7 @@ jobs:
           aws configure set aws_secret_access_key $GLOBAL_DEVSTAGE_IAM_SECRET
           aws configure set default.region $GLOBAL_AWS_REGION
           aws ecr get-login-password --region $GLOBAL_AWS_REGION 
+          aws ecr create-repository --repository-name $GLOBAL_REPO_NAME 2>/dev/null || true
           
   push-image:
       name: push image to ECR
